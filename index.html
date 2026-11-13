@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c2a1e">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Crib Log">
+<meta name="format-detection" content="telephone=no">
+<title>Crib Log</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#0c2a1e; --felt:#11402c; --felt2:#164d36; --card:rgba(6,26,17,.55); --card2:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --text:#f6efe1; --muted:#b9c7b8; --dim:#7f9886;
+  --wood:#b0763e; --wood2:#8a5726; --woodDark:#5a3616; --woodLight:#d9a568;
+  --gold:#f2c14e; --goldInk:#2a1a00; --red:#e5534b; --blue:#4c8fe6; --win:#7bd88f; --loss:#ff7a6e;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+html{background:var(--bg)}
+body{min-height:100dvh;background:
+  radial-gradient(120% 80% at 50% 0%,rgba(46,120,80,.55),rgba(46,120,80,0) 60%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+  linear-gradient(180deg,#123f2b,#0b281c 70%);background-attachment:fixed}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;padding:calc(var(--sat) + 12px) calc(var(--sar) + 18px) 10px calc(var(--sal) + 18px);margin-bottom:6px;
+  background:rgba(10,36,25,.82);backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px);border-bottom:1px solid transparent;transition:border-color .2s;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.top.scrolled{border-bottom-color:var(--line)}
+.top h1{margin:0;font-size:28px;letter-spacing:-.02em;font-weight:800}
+.top .sub{color:var(--woodLight);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.top .back{display:flex;align-items:center;gap:4px;color:var(--gold);font-weight:600;font-size:16px;padding:6px 0}
+main{padding:0 calc(var(--sar) + 14px) calc(var(--sab) + 100px) calc(var(--sal) + 14px);max-width:640px;margin:0 auto}
+
+/* wood rail tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;align-items:flex-end;
+  padding:8px calc(var(--sar) + 8px) calc(var(--sab) + 8px) calc(var(--sal) + 8px);
+  background:linear-gradient(180deg,#9c6531,#7a4a1f);box-shadow:0 -1px 0 rgba(255,220,170,.25) inset,0 -10px 30px rgba(0,0,0,.35);border-top:1px solid #4d2e12}
+nav.tabs::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(178deg,rgba(0,0,0,.0) 0 7px,rgba(0,0,0,.07) 7px 9px);pointer-events:none}
+nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(255,236,205,.62);font-size:11px;font-weight:700;padding:4px 0;min-height:52px;justify-content:center;position:relative;transition:color .15s}
+nav.tabs button svg{width:26px;height:26px}
+nav.tabs button.on{color:#fff6e3}
+nav.tabs button.on::after{content:"";position:absolute;top:-2px;width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+nav.tabs button.add .plus{width:58px;height:58px;margin-top:-26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%,#ffe39a,var(--gold) 45%,#c8901f);color:var(--goldInk);box-shadow:0 6px 18px rgba(0,0,0,.45),0 0 0 4px #7a4a1f}
+nav.tabs button.add .plus svg{width:30px;height:30px}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 8px 24px -14px rgba(0,0,0,.6)}
+.wood{background:
+  repeating-linear-gradient(176deg,rgba(255,255,255,0) 0 9px,rgba(60,30,8,.13) 9px 11px,rgba(255,255,255,0) 11px 19px,rgba(255,220,170,.06) 19px 20px),
+  linear-gradient(160deg,#c48a4f,#9b6331 60%,#86521f);border:1px solid #5a3616;color:#fff7e8;box-shadow:inset 0 1px 0 rgba(255,230,190,.35),0 12px 30px -12px rgba(0,0,0,.7)}
+.wood .label{color:rgba(255,240,215,.8)}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)} .dim{color:var(--dim)}
+.big{font-size:52px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.holes{display:grid;grid-template-columns:repeat(15,1fr);gap:9px 0;justify-items:center;margin-top:14px}
+.holes i{width:11px;height:11px;border-radius:50%;background:#3d230c;box-shadow:inset 0 2px 2px rgba(0,0,0,.6),0 1px 0 rgba(255,220,170,.3)}
+.holes i.w{background:radial-gradient(circle at 35% 30%,#ffb0a8,var(--red) 55%,#8e1f18)}
+.holes i.l{background:radial-gradient(circle at 35% 30%,#bcd8ff,var(--blue) 55%,#1b4c8e)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{display:block;font-size:28px;font-weight:850;letter-spacing:-.02em;margin-top:4px}
+.stat small{color:var(--dim);font-size:12px;font-weight:600}
+.cW{color:var(--win)} .cL{color:var(--loss)} .cG{color:var(--gold)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 20px;border-radius:15px;font-weight:800;font-size:16px;background:var(--card2);border:1px solid var(--line2);transition:transform .1s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:radial-gradient(circle at 30% 20%,#ffe39a,var(--gold) 50%,#d29a27);color:var(--goldInk);border-color:transparent;box-shadow:0 8px 24px -8px rgba(242,193,78,.6)}
+.btn.danger{color:var(--loss)}
+.btn.block{width:100%}
+.btn.sm{height:38px;padding:0 14px;font-size:14px;border-radius:12px}
+.btn:disabled{opacity:.45}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(242,193,78,.15);color:var(--gold);letter-spacing:.03em}
+.chip.red{background:rgba(229,83,75,.18);color:#ffb3ad}
+
+/* match rows */
+.m{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.m:last-child{border-bottom:0}
+.badge{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px}
+.badge.W{background:rgba(123,216,143,.16);color:var(--win);border:1px solid rgba(123,216,143,.35)}
+.badge.L{background:rgba(255,122,110,.14);color:var(--loss);border:1px solid rgba(255,122,110,.3)}
+.badge.P{background:rgba(242,193,78,.12);color:var(--gold);border:1px dashed rgba(242,193,78,.5)}
+.m .who{font-weight:750;font-size:16px}
+.m .meta{font-size:12.5px;color:var(--dim);font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.m .sc{margin-left:auto;text-align:right;flex:none}
+.m .sc b{display:block;font-size:17px;font-weight:800}
+.m .sc span{font-size:12.5px;font-weight:700}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.inp{width:100%;height:54px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line2);padding:0 14px;font-size:18px;font-weight:650;outline:none}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,193,78,.2)}
+input[type=date].inp{font-size:16px;color-scheme:dark}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{height:54px;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--line2);font-weight:800;font-size:16px;color:var(--muted);transition:all .15s}
+.seg button.on{background:var(--felt2);border-color:var(--gold);color:var(--text);box-shadow:inset 0 0 0 1px var(--gold)}
+.seg button.onW.on{background:rgba(123,216,143,.16);border-color:var(--win);box-shadow:inset 0 0 0 1px var(--win);color:#e9ffee}
+.seg button.onL.on{background:rgba(255,122,110,.14);border-color:var(--loss);box-shadow:inset 0 0 0 1px var(--loss);color:#ffe9e6}
+.opps{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.opps button{height:36px;padding:0 13px;border-radius:99px;background:rgba(255,255,255,.07);border:1px solid var(--line2);font-weight:700;font-size:14px}
+.opps button.on{background:var(--gold);color:var(--goldInk);border-color:transparent}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sbox{border-radius:16px;padding:12px;background:rgba(0,0,0,.25);border:1px solid var(--line2);text-align:center}
+.sbox .label{display:flex;align-items:center;justify-content:center;gap:6px}
+.sbox .label i{width:10px;height:10px;border-radius:50%}
+.sbox input{width:100%;background:none;border:0;outline:none;text-align:center;font-size:44px;font-weight:900;letter-spacing:-.02em;height:58px;-moz-appearance:textfield}
+.sbox input::-webkit-outer-spin-button,.sbox input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.sbox.bad{border-color:var(--loss)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.steps button{height:38px;border-radius:10px;background:rgba(255,255,255,.07);font-weight:800;font-size:14px;color:var(--muted)}
+.preview{border-radius:16px;padding:14px;text-align:center;font-weight:800;font-size:17px;margin:14px 0;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:rgba(0,0,0,.2);border:1px dashed var(--line2);color:var(--muted)}
+.preview.W{color:var(--win);border-color:rgba(123,216,143,.4);background:rgba(123,216,143,.08)}
+.preview.L{color:var(--loss);border-color:rgba(255,122,110,.4);background:rgba(255,122,110,.07)}
+.preview.err{color:#ffc2bb}
+
+/* filters */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;margin:0 -2px}
+.filters::-webkit-scrollbar{display:none}
+.filters button{flex:none;height:40px;padding:0 15px;border-radius:99px;background:rgba(0,0,0,.25);border:1px solid var(--line2);font-weight:750;font-size:14px;color:var(--muted)}
+.filters button.on{background:var(--gold);color:var(--goldInk);border-color:transparent}
+select.inp{appearance:none;-webkit-appearance:none;background:rgba(0,0,0,.28) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2c14e' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;font-size:16px;height:48px}
+table.opp{width:100%;border-collapse:collapse;font-size:14.5px}
+table.opp th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);text-align:right;font-weight:800;padding:0 4px 8px}
+table.opp th:first-child,table.opp td:first-child{text-align:left}
+table.opp td{padding:10px 4px;border-top:1px solid var(--line);text-align:right;font-weight:700}
+.bar{height:6px;border-radius:9px;background:rgba(255,122,110,.35);overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--win)}
+
+.empty{text-align:center;padding:30px 18px}
+.empty h2{margin:14px 0 6px;font-size:22px}
+.empty p{margin:0 0 18px;color:var(--muted)}
+.miniboard{margin:0 auto;width:220px;height:74px;border-radius:16px;position:relative}
+.miniboard .holes{display:flex;justify-content:center;margin-top:0;padding-top:14px;gap:9px}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);opacity:0;transition:opacity .25s;display:flex;align-items:flex-end}
+.scrim.show{opacity:1}
+.sheet{width:100%;max-width:640px;margin:0 auto;background:#123826;border-top:1px solid var(--line2);border-radius:24px 24px 0 0;padding:18px 18px calc(var(--sab) + 20px);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.scrim.show .sheet{transform:none}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line2);margin:0 auto 14px}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0 0 16px;font-size:15px}
+dl.kv dt{color:var(--dim);font-weight:700} dl.kv dd{margin:0;text-align:right;font-weight:750}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--sab) + 96px);transform:translate(-50%,20px);background:#fff6e3;color:#1d1405;font-weight:800;padding:10px 16px;border-radius:99px;opacity:0;transition:all .25s;z-index:80;pointer-events:none;font-size:14px;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* celebration overlay */
+#fx{position:fixed;inset:0;z-index:100;display:none;cursor:pointer;touch-action:none}
+#fx.show{display:block}
+#fx canvas{position:absolute;inset:0;width:100%;height:100%}
+#fx .msg{position:absolute;left:0;right:0;top:calc(var(--sat) + 13%);text-align:center;padding:0 20px;pointer-events:none}
+#fx .msg h2{margin:0;font-size:46px;font-weight:950;letter-spacing:-.02em;text-shadow:0 4px 0 rgba(0,0,0,.25),0 10px 30px rgba(0,0,0,.45);animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
+#fx .msg p{margin:8px 0 0;font-size:19px;font-weight:800;opacity:.95;text-shadow:0 2px 10px rgba(0,0,0,.5);animation:fadeUp .5s .25s both}
+#fx .msg .tag{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:99px;font-weight:900;font-size:15px;letter-spacing:.06em;animation:fadeUp .5s .45s both}
+#fx .tap{position:absolute;left:0;right:0;bottom:calc(var(--sab) + 34px);text-align:center;font-weight:800;font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;animation:blink 1.6s 1.2s infinite both;pointer-events:none}
+#fx.win{background:radial-gradient(90% 70% at 50% 35%,rgba(40,130,80,.92),rgba(6,30,18,.96))}
+#fx.win h2{color:#ffe08a}
+#fx.win .tag{background:var(--gold);color:var(--goldInk)}
+#fx.loss{background:radial-gradient(90% 70% at 50% 35%,rgba(40,52,70,.94),rgba(10,14,22,.97))}
+#fx.loss h2{color:#cfe0ff}
+#fx.loss .tag{background:#ff7a6e;color:#2a0603}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:.85}}
+</style>
+</head>
+<body>
+<header class="top" id="top"></header>
+<main id="view"></main>
+<nav class="tabs" id="tabs">
+  <button data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="10" rx="3"/><circle cx="7.5" cy="10.5" r=".6" fill="currentColor"/><circle cx="11" cy="10.5" r=".6" fill="currentColor"/><circle cx="14.5" cy="13.5" r=".6" fill="currentColor"/><circle cx="18" cy="13.5" r=".6" fill="currentColor"/></svg>Board</button>
+  <button data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>History</button>
+  <button data-tab="log" class="add" aria-label="Log a match"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Log</button>
+  <button data-tab="rivals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.5 4.5 4.5"/></svg>Rivals</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Setup</button>
+</nav>
+<div id="fx"><canvas id="fxc"></canvas><div class="msg" id="fxm"></div><div class="tap">Tap to continue</div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ---------- constants ---------- */
+const KEY='crib.v1';
+const GAME_TO=121;          // cribbage game ends at 121
+const CLOSE_MAX=10;         // "close" = margin <= 10
+const BLOWOUT_MIN=30;       // "blowout" = margin >= 30
+const SKUNK_MIN=31;         // lost by 31+  (loser <= 90)
+const DSKUNK_MIN=61;        // lost by 61+  (loser <= 60)
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5);
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());};
+const fdate=ds=>{if(!ds)return'';const[y,m,d]=ds.split('-').map(Number);const cy=new Date().getFullYear();return MON[m-1]+' '+d+(y!==cy?', '+y:'');};
+const I={
+  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  deal:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="3" width="11" height="15" rx="2"/><path d="M9 21h9a2 2 0 0 0 2-2V8"/></svg>'
+};
+
+/* ---------- state ----------
+  Match model (stage 3 ready):
+  { id, status:'final'|'pending', opponent, firstDealer:'me'|'them'|null,
+    myScore, oppScore, date:'YYYY-MM-DD', createdAt, updatedAt,
+    scheduled:null | {date,time,location}, invite:null | {uid, sentTo, acceptedAt}, notes:'' }
+  Result / margin / skunk are always derived from the scores, never stored. */
+function fresh(){return{v:1,me:'Me',sound:true,matches:[]};}
+function migrate(s){s.v=1;s.me=s.me||'Me';if(s.sound===undefined)s.sound=true;s.matches=(s.matches||[]).filter(m=>m&&m.id).map(m=>({status:'final',firstDealer:null,scheduled:null,invite:null,notes:'',...m}));return s;}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.matches))return migrate(s);}catch(e){}return fresh();}
+let S=load(),tab='home',sub=null,hfilter='all',hopp='';
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Storage full — export a backup');}}
+
+/* ---------- math ---------- */
+const isFinal=m=>m.status!=='pending'&&Number.isFinite(m.myScore)&&Number.isFinite(m.oppScore);
+const won=m=>m.myScore>m.oppScore;
+const margin=m=>Math.abs(m.myScore-m.oppScore);
+const skunk=m=>{const g=margin(m);return g>=DSKUNK_MIN?2:g>=SKUNK_MIN?1:0;};
+const mkey=m=>(m.date||'')+'|'+String(m.createdAt||0).padStart(15,'0');
+const finals=()=>S.matches.filter(isFinal).sort((a,b)=>mkey(b)<mkey(a)?-1:mkey(b)>mkey(a)?1:0); // newest first
+const pendings=()=>S.matches.filter(m=>m.status==='pending').sort((a,b)=>((a.scheduled?.date||a.date||'')+(a.scheduled?.time||''))<((b.scheduled?.date||b.date||'')+(b.scheduled?.time||''))?-1:1);
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function stats(list){
+  const W=list.filter(won),L=list.filter(m=>!won(m));
+  let streak=0,st=null;for(const m of list){const r=won(m)?'W':'L';if(st===null){st=r;streak=1;}else if(r===st)streak++;else break;}
+  let best=0,run=0;for(const m of [...list].reverse()){if(won(m)){run++;best=Math.max(best,run);}else run=0;}
+  return{n:list.length,w:W.length,l:L.length,pct:list.length?W.length/list.length:null,streak,st,best,
+    avgW:avg(W.map(margin)),avgL:avg(L.map(margin)),
+    skGiven:W.filter(m=>skunk(m)).length,skTaken:L.filter(m=>skunk(m)).length,
+    closeW:W.filter(m=>margin(m)<=CLOSE_MAX).length,closeL:L.filter(m=>margin(m)<=CLOSE_MAX).length,
+    blowW:W.filter(m=>margin(m)>=BLOWOUT_MIN).length,blowL:L.filter(m=>margin(m)>=BLOWOUT_MIN).length};
+}
+function opponents(){const map=new Map();for(const m of finals()){const k=m.opponent.trim().toLowerCase();if(!map.has(k))map.set(k,{name:m.opponent.trim(),list:[]});map.get(k).list.push(m);}
+  return[...map.values()].map(o=>({name:o.name,...stats(o.list),last:o.list[0].date})).sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));}
+const f1=x=>x==null?'—':(Math.round(x*10)/10).toFixed(1);
+const fpct=x=>x==null?'—':Math.round(x*100)+'%';
+
+/* ---------- ui helpers ---------- */
+function vib(p=12){try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
+function setTop(h){const t=$('#top');t.className='top'+(window.scrollY>4?' scrolled':'');t.innerHTML=h;}
+function go(t,s=null){tab=t;sub=s;render();window.scrollTo(0,0);}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();go(b.dataset.tab);};
+function sheet(html){
+  const sc=document.createElement('div');sc.className='scrim';sc.innerHTML=`<div class="sheet"><div class="grab"></div>${html}</div>`;document.body.appendChild(sc);
+  requestAnimationFrame(()=>sc.classList.add('show'));
+  const close=()=>{sc.classList.remove('show');setTimeout(()=>sc.remove(),280);};
+  sc.addEventListener('click',e=>{if(e.target===sc||e.target.closest('[data-close]'))close();});
+  return{el:sc,close};
+}
+function mRow(m){
+  if(m.status==='pending')return`<button class="m" data-mid="${m.id}"><div class="badge P">•</div><div><div class="who">vs ${esc(m.opponent)}</div><div class="meta">${fdate(m.scheduled?.date||m.date)}${m.scheduled?.time?' · '+esc(m.scheduled.time):''}${m.scheduled?.location?' · '+esc(m.scheduled.location):''}</div></div><div class="sc"><span class="cG">Pending</span></div></button>`;
+  const w=won(m),g=margin(m),sk=skunk(m);
+  return`<button class="m" data-mid="${m.id}"><div class="badge ${w?'W':'L'}">${w?'W':'L'}</div>
+    <div style="min-width:0"><div class="who">vs ${esc(m.opponent)}</div><div class="meta">${fdate(m.date)}${m.firstDealer?` · ${I.deal} ${m.firstDealer==='me'?'I dealt':'They dealt'}`:''}${sk?` <span class="chip ${w?'':'red'}">${sk===2?'DOUBLE SKUNK':'SKUNK'}</span>`:''}</div></div>
+    <div class="sc"><b class="num">${m.myScore}–${m.oppScore}</b><span class="num ${w?'cW':'cL'}">${w?'+':'−'}${g}</span></div></button>`;
+}
+function bindRows(root){$$('[data-mid]',root).forEach(b=>b.onclick=()=>{vib();matchSheet(b.dataset.mid);});}
+function matchSheet(id){
+  const m=S.matches.find(x=>x.id===id);if(!m)return;
+  const fin=isFinal(m),w=fin&&won(m),sk=fin?skunk(m):0;
+  const s=sheet(`<div class="row between" style="margin-bottom:14px"><div><div class="label">${fin?(w?'Win':'Loss'):'Pending match'}</div><div style="font-size:24px;font-weight:850">vs ${esc(m.opponent)}</div></div>${fin?`<div class="badge ${w?'W':'L'}" style="width:52px;height:52px;font-size:22px">${w?'W':'L'}</div>`:''}</div>
+    <dl class="kv">${fin?`<dt>Final</dt><dd class="num">${esc(S.me)} ${m.myScore} – ${m.oppScore} ${esc(m.opponent)}</dd><dt>Margin</dt><dd class="num ${w?'cW':'cL'}">${w?'Won':'Lost'} by ${margin(m)}${sk?` · ${sk===2?'double skunk':'skunk'}`:''}</dd>`:''}
+    <dt>Date</dt><dd>${fdate(m.scheduled?.date||m.date)}</dd>${m.firstDealer?`<dt>First deal</dt><dd>${m.firstDealer==='me'?esc(S.me):esc(m.opponent)}</dd>`:''}
+    ${m.scheduled?.location?`<dt>Where</dt><dd>${esc(m.scheduled.location)}</dd>`:''}</dl>
+    <div class="row"><button class="btn block" data-close>Close</button><button class="btn block danger" id="del">Delete</button></div>`);
+  $('#del',s.el).onclick=()=>{if(confirm(`Delete this match vs ${m.opponent}${fin?` (${m.myScore}–${m.oppScore})`:''}? This can't be undone.`)){S.matches=S.matches.filter(x=>x.id!==id);save();s.close();toast('Match deleted');render();}};
+}
+
+/* ---------- render ---------- */
+function render(){
+  $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  ({home:renderHome,log:renderLog,history:renderHistory,rivals:renderRivals,settings:renderSettings})[tab]();
+}
+function holesHTML(list,n=30){const r=list.slice(0,n).reverse();return`<div class="holes">${r.map(m=>`<i class="${won(m)?'w':'l'}"></i>`).join('')}${'<i></i>'.repeat(Math.max(0,n-r.length))}</div>`;}
+function renderHome(){
+  const v=$('#view'),F=finals(),st=stats(F),P=pendings();
+  setTop(`<div><div class="sub">Cribbage tracker</div><h1>Crib Log</h1></div>`);
+  if(!F.length&&!P.length){
+    v.innerHTML=`<div class="card empty"><div class="miniboard wood"><div class="holes">${'<i></i>'.repeat(12)}</div><div class="holes" style="padding-top:10px">${'<i></i>'.repeat(12)}</div></div>
+      <h2>No games on the board yet</h2><p>Log your first match and your win rate, streak, and margins show up here.</p>
+      <button class="btn pri block" id="first">Log a match</button></div>
+      <div class="muted" style="text-align:center;font-size:13px;margin-top:6px">Final scores only — no hand counting. 15-2, 15-4, and the rest is yours.</div>`;
+    $('#first').onclick=()=>go('log');return;
+  }
+  const sc=st.st==='W'?'cW':'cL';
+  v.innerHTML=`<div class="card wood">
+      <div class="row between"><div class="label">Win rate</div><div class="label">${st.n} game${st.n===1?'':'s'}</div></div>
+      <div class="row between" style="align-items:flex-end;margin-top:6px"><div class="big num">${fpct(st.pct)}</div>
+        <div style="text-align:right"><div style="font-size:26px;font-weight:900" class="num">${st.w}–${st.l}</div><div class="label">Record</div></div></div>
+      ${holesHTML(F)}
+      <div style="font-size:11.5px;margin-top:8px;opacity:.75;font-weight:700">Last ${Math.min(30,F.length)} games · red peg = win, blue = loss · oldest → newest</div>
+    </div>
+    <div class="grid2">
+      <div class="stat"><div class="label">Streak</div><b class="num ${st.n?sc:''}">${st.n?st.st+st.streak:'—'}</b><small>${st.n?(st.st==='W'?'winning':'losing')+' streak · best W'+st.best:'no games'}</small></div>
+      <div class="stat"><div class="label">Skunks</div><b class="num">${st.skGiven}<span class="dim" style="font-size:18px"> / ${st.skTaken}</span></b><small>given / taken</small></div>
+      <div class="stat"><div class="label">Avg win margin</div><b class="num cW">${st.avgW==null?'—':'+'+f1(st.avgW)}</b><small>${st.closeW} close · ${st.blowW} blowout</small></div>
+      <div class="stat"><div class="label">Avg loss margin</div><b class="num cL">${st.avgL==null?'—':'−'+f1(st.avgL)}</b><small>${st.closeL} close · ${st.blowL} blowout</small></div>
+    </div>
+    ${P.length?`<div class="card"><div class="label" style="margin-bottom:4px">Upcoming</div>${P.slice(0,3).map(mRow).join('')}</div>`:''}
+    <div class="card"><div class="row between" style="margin-bottom:2px"><div class="label">Recent matches</div><button class="btn sm" id="all">See all</button></div>
+      ${F.slice(0,5).map(mRow).join('')||'<div class="muted" style="padding:10px 0">No finished games yet.</div>'}</div>
+    <button class="btn pri block" id="newm">Log a match</button>`;
+  bindRows(v);$('#all').onclick=()=>go('history');$('#newm').onclick=()=>go('log');
+}
+
+/* ---------- log a match ---------- */
+let draft=null;
+function newDraft(){return{opponent:'',firstDealer:null,winner:null,my:'',opp:'',date:today()};}
+function validate(d){
+  const my=d.my===''?NaN:Number(d.my),op=d.opp===''?NaN:Number(d.opp);
+  if(!d.opponent.trim())return{err:'Who did you play?'};
+  if(!Number.isInteger(my)||!Number.isInteger(op))return{err:'Enter both final scores'};
+  if(my<0||op<0)return{err:'Scores can’t be negative'};
+  if(my>GAME_TO||op>GAME_TO)return{err:`Nobody scores past ${GAME_TO}`};
+  if(my===op)return{err:'Scores can’t tie — someone pegged out'};
+  if(Math.max(my,op)!==GAME_TO)return{err:`Winner’s score should be ${GAME_TO}`};
+  if(!d.date)return{err:'Pick a date'};
+  return{ok:true,my,op,win:my>op,margin:Math.abs(my-op)};
+}
+function renderLog(){
+  const v=$('#view');if(!draft)draft=newDraft();const d=draft;
+  setTop(`<div><div class="sub">Final totals only</div><h1>Log a match</h1></div>`);
+  const opps=opponents().map(o=>o.name);
+  v.innerHTML=`<div class="card">
+    <div class="field"><div class="label">Opponent</div><input class="inp" id="opp" list="opplist" placeholder="e.g. Robert" autocomplete="off" autocapitalize="words" enterkeyhint="next" value="${esc(d.opponent)}">
+      <datalist id="opplist">${opps.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+      ${opps.length?`<div class="opps" id="opps">${opps.slice(0,8).map(o=>`<button data-o="${esc(o)}" class="${o.toLowerCase()===d.opponent.trim().toLowerCase()?'on':''}">${esc(o)}</button>`).join('')}</div>`:''}</div>
+    <div class="field"><div class="label">Who dealt first?</div><div class="seg" id="deal"><button data-v="me" class="${d.firstDealer==='me'?'on':''}">${esc(S.me)}</button><button data-v="them" class="${d.firstDealer==='them'?'on':''}">${esc(d.opponent.trim()||'Them')}</button></div></div>
+    <div class="field"><div class="label">Who pegged out at ${GAME_TO}?</div><div class="seg" id="win"><button data-v="me" class="onW ${d.winner==='me'?'on':''}">I won</button><button data-v="them" class="onL ${d.winner==='them'?'on':''}">They won</button></div></div>
+    <div class="label" style="margin-bottom:6px">Final scores</div>
+    <div class="scores">
+      <div class="sbox" id="bmy"><div class="label"><i style="background:var(--red)"></i>${esc(S.me)}</div><input id="my" class="num" type="number" inputmode="numeric" min="0" max="${GAME_TO}" placeholder="0" value="${esc(d.my)}"><div class="steps" data-for="my"><button data-s="-5">−5</button><button data-s="-1">−1</button><button data-s="1">+1</button><button data-s="5">+5</button></div></div>
+      <div class="sbox" id="bop"><div class="label"><i style="background:var(--blue)"></i><span id="oppLbl">${esc(d.opponent.trim()||'Them')}</span></div><input id="op" class="num" type="number" inputmode="numeric" min="0" max="${GAME_TO}" placeholder="0" value="${esc(d.opp)}"><div class="steps" data-for="op"><button data-s="-5">−5</button><button data-s="-1">−1</button><button data-s="1">+1</button><button data-s="5">+5</button></div></div>
+    </div>
+    <div class="preview" id="prev"></div>
+    <div class="field" style="margin-bottom:0"><div class="label">Date</div><input class="inp" type="date" id="date" value="${esc(d.date)}" max="${today()}"></div>
+  </div>
+  <button class="btn pri block" id="save">Save match</button>
+  <button class="btn block" id="clear" style="margin-top:10px;background:none;border-color:transparent;color:var(--muted)">Clear form</button>`;
+  const opp=$('#opp'),my=$('#my'),op=$('#op');
+  const sync=()=>{
+    const r=validate(d),p=$('#prev');
+    $('#bmy').classList.toggle('bad',d.my!==''&&(+d.my>GAME_TO||+d.my<0));$('#bop').classList.toggle('bad',d.opp!==''&&(+d.opp>GAME_TO||+d.opp<0));
+    // keep winner toggle in sync with typed scores
+    if(d.my!==''&&d.opp!==''&&+d.my!==+d.opp){const wv=+d.my>+d.opp?'me':'them';if(d.winner!==wv){d.winner=wv;$$('#win button').forEach(b=>b.classList.toggle('on',b.dataset.v===wv));}}
+    if(r.ok){const sk=r.margin>=DSKUNK_MIN?2:r.margin>=SKUNK_MIN?1:0;p.className='preview '+(r.win?'W':'L');
+      p.innerHTML=`${r.win?'Win':'Loss'} by <span class="num">${r.margin}</span>${r.margin<=CLOSE_MAX?' · nail-biter':r.margin>=BLOWOUT_MIN?' · blowout':''}${sk?` <span class="chip ${r.win?'':'red'}">${sk===2?'DOUBLE SKUNK':'SKUNK'}</span>`:''}`;}
+    else{p.className='preview'+(d.my!==''&&d.opp!==''&&d.opponent.trim()?' err':'');p.textContent=r.err;}
+    $('#save').disabled=!r.ok;
+    draftSave();
+  };
+  opp.oninput=()=>{d.opponent=opp.value;$('#oppLbl').textContent=d.opponent.trim()||'Them';$('#deal [data-v=them]').textContent=d.opponent.trim()||'Them';
+    $$('#opps button').forEach(b=>b.classList.toggle('on',b.dataset.o.toLowerCase()===d.opponent.trim().toLowerCase()));sync();};
+  const os=$('#opps');if(os)os.onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();opp.value=b.dataset.o;opp.oninput();};
+  $('#deal').onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();d.firstDealer=d.firstDealer===b.dataset.v?null:b.dataset.v;$$('#deal button').forEach(x=>x.classList.toggle('on',x.dataset.v===d.firstDealer));sync();};
+  $('#win').onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();d.winner=b.dataset.v;$$('#win button').forEach(x=>x.classList.toggle('on',x===b));
+    const [wi,li,wk,lk]=d.winner==='me'?[my,op,'my','opp']:[op,my,'opp','my'];
+    d[wk]=String(GAME_TO);wi.value=GAME_TO;if(d[lk]!==''&&+d[lk]>=GAME_TO){d[lk]='';li.value='';}
+    sync();if(d[lk]===''){li.focus();}};
+  my.oninput=()=>{d.my=my.value.trim();sync();};op.oninput=()=>{d.opp=op.value.trim();sync();};
+  $$('.steps').forEach(g=>g.onclick=e=>{const b=e.target.closest('button');if(!b)return;vib(8);const k=g.dataset.for==='my'?'my':'opp',inp=g.dataset.for==='my'?my:op;
+    const nv=Math.max(0,Math.min(GAME_TO,(Number(d[k])||0)+Number(b.dataset.s)));d[k]=String(nv);inp.value=nv;sync();});
+  $('#date').onchange=e=>{d.date=e.target.value||today();sync();};
+  $('#clear').onclick=()=>{draft=newDraft();draftSave();renderLog();};
+  $('#save').onclick=()=>{const r=validate(d);if(!r.ok){toast(r.err);return;}
+    const known=opponents().find(o=>o.name.toLowerCase()===d.opponent.trim().toLowerCase());
+    const now=Date.now(),m={id:uid(),status:'final',opponent:known?known.name:d.opponent.trim(),firstDealer:d.firstDealer,myScore:r.my,oppScore:r.op,date:d.date,createdAt:now,updatedAt:now,scheduled:null,invite:null,notes:''};
+    S.matches.push(m);save();draft=newDraft();draftSave();
+    celebrate(m,()=>go('home'));};
+  sync();
+}
+const DK='crib.draft.v1';
+function draftSave(){try{localStorage.setItem(DK,JSON.stringify(draft));}catch(e){}}
+try{const dd=JSON.parse(localStorage.getItem(DK));if(dd&&typeof dd==='object')draft={...newDraft(),...dd,date:dd.date||today()};}catch(e){}
+
+/* ---------- history ---------- */
+const FILTERS=[['all','All'],['W','Wins'],['L','Losses'],['close',`Close (≤${CLOSE_MAX})`],['blow',`Blowouts (${BLOWOUT_MIN}+)`]];
+function applyFilter(list,f){return list.filter(m=>f==='all'||(f==='W'&&won(m))||(f==='L'&&!won(m))||(f==='close'&&margin(m)<=CLOSE_MAX)||(f==='blow'&&margin(m)>=BLOWOUT_MIN));}
+function renderHistory(){
+  const v=$('#view'),F=finals(),opps=opponents();
+  setTop(`<div><div class="sub">${F.length} game${F.length===1?'':'s'}</div><h1>History</h1></div>`);
+  if(hopp&&!opps.some(o=>o.name===hopp))hopp='';
+  let list=F;if(hopp)list=list.filter(m=>m.opponent.trim().toLowerCase()===hopp.toLowerCase());
+  const counts=Object.fromEntries(FILTERS.map(([k])=>[k,applyFilter(list,k).length]));
+  const shown=applyFilter(list,hfilter),st=stats(shown);
+  v.innerHTML=`<div class="filters" id="flt">${FILTERS.map(([k,l])=>`<button data-f="${k}" class="${hfilter===k?'on':''}">${l} <span style="opacity:.6">${counts[k]}</span></button>`).join('')}</div>
+    <select class="inp" id="oppsel" style="margin-bottom:12px"><option value="">All opponents</option>${opps.map(o=>`<option ${o.name===hopp?'selected':''} value="${esc(o.name)}">vs ${esc(o.name)} (${o.w}–${o.l})</option>`).join('')}</select>
+    ${shown.length?`<div class="card" style="padding:12px 16px"><div class="row between"><div class="label">${shown.length} shown · ${st.w}–${st.l}</div><div class="label">${st.avgW!=null?'<span class="cW">+'+f1(st.avgW)+'</span>':''} ${st.avgL!=null?'<span class="cL">−'+f1(st.avgL)+'</span>':''}</div></div>${shown.map(mRow).join('')}</div>`
+      :`<div class="card empty"><h2 style="margin-top:0">${F.length?'Nothing matches':'No games yet'}</h2><p>${F.length?'Try another filter.':'Logged matches will show up here, newest first.'}</p>${F.length?'':'<button class="btn pri" id="first">Log a match</button>'}</div>`}
+    ${opps.length?`<div class="card">${oppTable(opps)}</div>`:''}`;
+  $('#flt').onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();hfilter=b.dataset.f;renderHistory();};
+  $('#oppsel').onchange=e=>{hopp=e.target.value;renderHistory();};
+  const fb=$('#first');if(fb)fb.onclick=()=>go('log');
+  bindRows(v);
+  $$('[data-op]',v).forEach(r=>r.onclick=()=>{hopp=r.dataset.op;hfilter='all';renderHistory();window.scrollTo(0,0);});
+}
+function oppTable(opps){
+  return`<div class="label" style="margin-bottom:10px">Record by opponent</div><table class="opp"><tr><th>Opponent</th><th>W–L</th><th>Win %</th><th>Avg +/−</th></tr>
+    ${opps.map(o=>`<tr data-op="${esc(o.name)}" style="cursor:pointer"><td>${esc(o.name)}<div class="bar"><i style="width:${Math.round(o.pct*100)}%"></i></div></td><td class="num">${o.w}–${o.l}</td><td class="num">${fpct(o.pct)}</td>
+      <td class="num"><span class="cW">${o.avgW==null?'—':'+'+f1(o.avgW)}</span> <span class="cL">${o.avgL==null?'—':'−'+f1(o.avgL)}</span></td></tr>`).join('')}</table>`;
+}
+function renderRivals(){
+  const v=$('#view'),opps=opponents();
+  setTop(`<div><div class="sub">Head to head</div><h1>Rivals</h1></div>`);
+  if(!opps.length){v.innerHTML=`<div class="card empty"><h2 style="margin-top:0">No rivals yet</h2><p>Every opponent you log gets a head-to-head record here.</p><button class="btn pri" id="first">Log a match</button></div>`;$('#first').onclick=()=>go('log');return;}
+  v.innerHTML=opps.map(o=>`<button class="card" data-op="${esc(o.name)}" style="display:block;width:100%;text-align:left">
+    <div class="row between"><div style="font-size:20px;font-weight:850">${esc(o.name)}</div><div class="num" style="font-size:22px;font-weight:900">${o.w}–${o.l}</div></div>
+    <div class="bar" style="height:8px;margin:10px 0"><i style="width:${Math.round(o.pct*100)}%"></i></div>
+    <div class="row between muted" style="font-size:13px;font-weight:700"><span>${fpct(o.pct)} wins · streak ${o.st}${o.streak}</span><span><span class="cW">${o.avgW==null?'—':'+'+f1(o.avgW)}</span> / <span class="cL">${o.avgL==null?'—':'−'+f1(o.avgL)}</span> avg</span></div>
+    <div class="dim" style="font-size:12px;margin-top:6px;font-weight:600">Last played ${fdate(o.last)}${o.skGiven||o.skTaken?` · skunks ${o.skGiven} given / ${o.skTaken} taken`:''}</div></button>`).join('');
+  $$('[data-op]',v).forEach(b=>b.onclick=()=>{vib();hopp=b.dataset.op;hfilter='all';go('history');});
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  const v=$('#view');
+  setTop(`<div><div class="sub">Name · sound · data</div><h1>Setup</h1></div>`);
+  v.innerHTML=`<div class="card"><div class="field" style="margin-bottom:0"><div class="label">Your name on the board</div><input class="inp" id="me" value="${esc(S.me)}" maxlength="24" enterkeyhint="done"></div></div>
+   <div class="card"><div class="row between"><div><div style="font-weight:800">Sound effects</div><div class="muted" style="font-size:13px">Fanfare on a win, sad trombone on a loss</div></div>
+     <div class="seg" id="snd" style="width:140px;grid-template-columns:1fr 1fr"><button data-v="1" class="${S.sound?'on':''}" style="height:44px">On</button><button data-v="0" class="${S.sound?'':'on'}" style="height:44px">Off</button></div></div></div>
+   <div class="card"><div class="label" style="margin-bottom:10px">Backup</div>
+    <div class="row"><button class="btn block" id="exjson">Export JSON</button><button class="btn block" id="imjson">Import JSON</button></div>
+    <div class="muted" style="font-size:13px;margin-top:10px">Data lives only on this device. Export a backup now and then.</div></div>
+   <div class="card"><div class="label" style="margin-bottom:10px">Try the animations</div><div class="row"><button class="btn block" id="tw">Win</button><button class="btn block" id="tl">Loss</button></div></div>
+   <div class="card"><button class="btn block danger" id="reset">Erase all data</button></div>
+   <div class="dim" style="text-align:center;font-size:12px;margin:8px 0 20px">Crib Log v1 · games to ${GAME_TO} · works offline</div>`;
+  $('#me').onchange=e=>{S.me=e.target.value.trim()||'Me';save();toast('Saved');};
+  $('#snd').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.sound=b.dataset.v==='1';save();renderSettings();};
+  $('#exjson').onclick=()=>download(`criblog-${today()}.json`,JSON.stringify(S,null,2),'application/json');
+  $('#imjson').onclick=()=>$('#file').click();
+  $('#tw').onclick=()=>celebrate({opponent:'Robert',myScore:121,oppScore:97,firstDealer:'me'},()=>{});
+  $('#tl').onclick=()=>celebrate({opponent:'Robert',myScore:88,oppScore:121,firstDealer:'them'},()=>{});
+  $('#reset').onclick=()=>{if(confirm('Erase ALL matches on this device?')&&confirm('Really erase everything? Export first if unsure.')){S=fresh();save();toast('All data erased');renderSettings();}};
+}
+async function download(name,text,type){
+  const blob=new Blob([text],{type});
+  try{const f=new File([blob],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})&&/iP(hone|ad|od)|Android/.test(navigator.userAgent)){await navigator.share({files:[f],title:name});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);toast('Exported '+name);
+}
+$('#file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.matches))throw 0;
+    const replace=confirm(`Backup has ${d.matches.length} matches.\n\nOK = replace all data on this device\nCancel = merge into existing data`);
+    migrate(d);
+    if(replace){S=migrate({...fresh(),...d});}
+    else{const have=new Set(S.matches.map(m=>m.id));d.matches.forEach(m=>{if(!have.has(m.id))S.matches.push(m);});}
+    save();toast('Imported '+d.matches.length+' matches');render();
+  }catch(err){alert('That file is not a valid Crib Log backup.');}
+};
+
+/* ---------- celebration / commiseration (canvas, no libraries) ---------- */
+const FX={raf:0,running:false,t0:0,parts:[],kind:'',done:null};
+let AC=null;
+function audio(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C();}if(AC&&AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,t,d,type='triangle',vol=.22,bend=0){const a=AC;if(!a)return;const g=a.createGain(),o=a.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(bend)o.frequency.linearRampToValueAtTime(f+bend,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);g.gain.setValueAtTime(vol,t+d*.7);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05);}
+function sfx(win){if(!S.sound)return;const a=audio();if(!a)return;const t=a.currentTime+.05;
+  if(win){[[523,0,.14],[659,.14,.14],[784,.28,.14],[1047,.42,.5]].forEach(([f,o,d])=>{tone(f,t+o,d,'triangle',.2);tone(f*2,t+o,d,'sine',.05);});}
+  else{[[392,0,.45,-6],[370,.5,.45,-6],[349,1.0,.45,-6],[330,1.5,1.1,-30]].forEach(([f,o,d,b])=>tone(f,t+o,d,'sawtooth',.09,b));}}
+function celebrate(m,done){
+  const win=won(m),g=margin(m),sk=skunk(m),fx=$('#fx'),cv=$('#fxc'),msg=$('#fxm');
+  FX.kind=win?'win':'loss';FX.done=done;FX.m=m;
+  fx.className='show '+FX.kind;
+  const oppn=esc(m.opponent);
+  const winLines=['Pegged out!','Winner winner!','Nice hands!','Cribbage king!'],lossLines=['Ouch.','Muggins.','The cards hate you.','Rough board.'];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  msg.innerHTML=win?`<h2>${g<=CLOSE_MAX?'Squeaked it!':pick(winLines)}</h2><p>Beat ${oppn} ${m.myScore}–${m.oppScore}</p><span class="tag">+${g}${sk?(sk===2?' · DOUBLE SKUNK':' · SKUNK'):''}</span>`
+    :`<h2>${pick(lossLines)}</h2><p>${oppn} got you ${m.oppScore}–${m.myScore}</p><span class="tag">−${g}${sk?(sk===2?' · DOUBLE SKUNKED':' · SKUNKED'):''}</span>`;
+  const dpr=Math.min(2,window.devicePixelRatio||1),W=innerWidth,H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+  FX.parts=win?winParts(W,H):lossParts(W,H);FX.t0=performance.now();FX.last=FX.t0;FX.running=true;
+  vib(win?[40,40,40,40,120]:[200,80,400]);sfx(win);
+  cancelAnimationFrame(FX.raf);
+  const loop=now=>{if(!FX.running)return;const dt=Math.min(.05,(now-FX.last)/1000);FX.last=now;const t=(now-FX.t0)/1000;c.clearRect(0,0,W,H);(win?drawWin:drawLoss)(c,W,H,t,dt);FX.raf=requestAnimationFrame(loop);};
+  FX.raf=requestAnimationFrame(loop);
+  fx.onclick=()=>{if(performance.now()-FX.t0<400)return;closeFx();};
+}
+function closeFx(){FX.running=false;cancelAnimationFrame(FX.raf);$('#fx').className='';const d=FX.done;FX.done=null;if(d)d();}
+const R=(a,b)=>a+Math.random()*(b-a);
+const CONF=['#f2c14e','#e5534b','#4c8fe6','#7bd88f','#ffffff','#ff9ad5','#ffd27a'];
+const SUITS=[['♥','#d22'],['♦','#d22'],['♠','#111'],['♣','#111']],RANKS=['A','5','J','Q','K','10','4','6'];
+function winParts(W,H){const p=[];
+  for(let i=0;i<170;i++)p.push({k:'c',x:R(0,W),y:R(-H*1.2,-10),vx:R(-40,40),vy:R(90,220),r:R(0,6.28),vr:R(-8,8),w:R(6,11),h:R(9,16),col:CONF[i%CONF.length],ph:R(0,6.28)});
+  for(let i=0;i<14;i++){const s=SUITS[i%4],left=i%2===0;p.push({k:'card',x:left?R(-60,W*.3):R(W*.7,W+60),y:H+R(40,260),vx:left?R(60,220):R(-220,-60),vy:R(-820,-560),r:R(-1,1),vr:R(-5,5),s:s[0],col:s[1],rank:RANKS[i%RANKS.length],sc:R(.8,1.15),delay:R(0,1.4)});}
+  return p;}
+function drawCard(c,p){c.save();c.translate(p.x,p.y);c.rotate(p.r);c.scale(p.sc,p.sc);const w=46,h=66;
+  c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle='#fffdf6';rr(c,-w/2,-h/2,w,h,6);c.fill();c.shadowColor='transparent';
+  c.strokeStyle='rgba(0,0,0,.15)';c.lineWidth=1;c.stroke();c.fillStyle=p.col;c.font='800 13px -apple-system,Segoe UI,Arial';c.textAlign='left';c.textBaseline='top';c.fillText(p.rank,-w/2+5,-h/2+4);
+  c.font='26px -apple-system,Segoe UI Symbol,Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(p.s,0,4);c.restore();}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function drawWin(c,W,H,t,dt){
+  // trophy-ish glow ring of pegs at center
+  const cx=W/2,cy=H*.56,rad=Math.min(W,H)*.2;
+  c.save();c.globalAlpha=Math.min(1,t*2);for(let i=0;i<24;i++){const a=i/24*6.283+t*.6;const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad*.55;c.fillStyle=i%2?'#e5534b':'#f2c14e';c.beginPath();c.arc(x,y,5+2*Math.sin(t*6+i),0,6.283);c.fill();}
+  c.font=`${Math.round(rad*.9)}px -apple-system,Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,Arial`;c.textAlign='center';c.textBaseline='middle';c.fillText('🏆',cx,cy+Math.sin(t*3)*6);c.restore();
+  for(const p of FX.parts){
+    if(p.k==='c'){p.vy=Math.min(p.vy+40*dt,260);p.x+=(p.vx+Math.sin(t*3+p.ph)*40)*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;if(p.y>H+20&&t<4.5){p.y=R(-60,-10);p.x=R(0,W);}
+      c.save();c.translate(p.x,p.y);c.rotate(p.r);c.scale(1,Math.abs(Math.cos(t*5+p.ph))*.9+.1);c.fillStyle=p.col;c.fillRect(-p.w/2,-p.h/2,p.w,p.h);c.restore();}
+    else{if(t<p.delay)continue;p.vy+=900*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;if(p.y>H+120&&p.vy>0&&t<4.5){p.y=H+60;p.vy=R(-820,-560);p.x=p.vx>0?R(-60,W*.3):R(W*.7,W+60);}drawCard(c,p);}
+  }
+}
+function lossParts(W,H){const p=[];const bw=Math.min(W*.86,360),bx=(W-bw)/2,by=H*.62;
+  const cols=['#e5534b','#4c8fe6','#f2c14e','#e5534b','#4c8fe6','#7bd88f'];
+  for(let i=0;i<6;i++){const hx=bx+bw*(.15+i*.14),hy=by+16+(i%2)*20;p.push({k:'peg',x:hx,y:hy-14,hx,hy,col:cols[i],vx:0,vy:0,r:0,vr:0,launch:1.0+i*.22+R(0,.12),out:false,rest:false});}
+  return{board:{bx,by,bw,bh:56},pegs:p,boot:{x:-120}};}
+function drawPeg(c,x,y,r,col){c.save();c.translate(x,y);c.rotate(r);const g=c.createLinearGradient(-6,0,6,0);g.addColorStop(0,col);g.addColorStop(.35,'#fff');g.addColorStop(.5,col);g.addColorStop(1,shade(col));
+  c.fillStyle=g;rr(c,-5,-12,10,26,4);c.fill();c.beginPath();c.ellipse(0,-12,6.5,5,0,0,6.283);c.fillStyle=col;c.fill();c.restore();}
+function shade(h){const n=parseInt(h.slice(1),16);const r=(n>>16)*.55,g=((n>>8)&255)*.55,b=(n&255)*.55;return`rgb(${r|0},${g|0},${b|0})`;}
+function drawLoss(c,W,H,t,dt){
+  const {board:b,pegs,boot}=FX.parts,floor=H-40;
+  // board
+  c.save();c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=18;c.shadowOffsetY=8;const g=c.createLinearGradient(0,b.by,0,b.by+b.bh);g.addColorStop(0,'#c48a4f');g.addColorStop(1,'#8a5726');c.fillStyle=g;rr(c,b.bx,b.by,b.bw,b.bh,12);c.fill();c.restore();
+  c.strokeStyle='rgba(60,30,8,.25)';c.lineWidth=1;for(let i=1;i<6;i++){c.beginPath();c.moveTo(b.bx+8,b.by+i*b.bh/6);c.lineTo(b.bx+b.bw-8,b.by+i*b.bh/6+2);c.stroke();}
+  c.fillStyle='#3d230c';for(let r=0;r<2;r++)for(let i=0;i<20;i++){c.beginPath();c.arc(b.bx+b.bw*(.06+i*.0465),b.by+16+r*20,3,0,6.283);c.fill();}
+  // the boot sweeping across
+  const bt=t-0.75;if(bt>0){boot.x=-110+bt*Math.max(260,b.bw*1.1);const bxp=boot.x,byp=b.by-6+Math.sin(bt*14)*4;
+    c.save();c.translate(bxp,byp);c.rotate(-.12+Math.sin(bt*14)*.08);c.font='64px -apple-system,Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,Arial';c.textAlign='center';c.textBaseline='middle';c.scale(-1,1);c.fillText('🥾',0,0);c.restore();}
+  for(const p of pegs){
+    if(!p.out&&boot.x+28>p.hx){p.out=true;p.vx=R(120,320);p.vy=R(-560,-380);p.vr=R(-14,14);}
+    if(p.out&&!p.rest){p.vy+=1100*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+      if(p.y>floor){p.y=floor;p.vy*=-.42;p.vx*=.6;p.vr*=.5;if(Math.abs(p.vy)<60){p.rest=true;p.vy=0;p.r=Math.PI/2*(p.vr>=0?1:-1);}}
+      if(p.x>W-10){p.x=W-10;p.vx*=-.5;}}
+    drawPeg(c,p.x,p.y,p.r,p.col);
+  }
+  // sad face, droops in
+  const fa=Math.min(1,Math.max(0,(t-.15)*2)),fx=W/2,fy=H*.43,fr=Math.min(W,H)*.13;
+  c.save();c.globalAlpha=fa;c.translate(fx,fy+Math.sin(t*1.6)*3);
+  c.fillStyle='#f6c945';c.beginPath();c.arc(0,0,fr,0,6.283);c.fill();c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=3;c.stroke();
+  c.fillStyle='#3a2a05';[-1,1].forEach(s=>{c.beginPath();c.ellipse(s*fr*.35,-fr*.18,fr*.08,fr*.12,0,0,6.283);c.fill();
+    c.strokeStyle='#3a2a05';c.lineWidth=fr*.06;c.beginPath();c.moveTo(s*fr*.52,-fr*.42);c.lineTo(s*fr*.2,-fr*.5+(s>0?0:0));c.stroke();});
+  c.lineWidth=fr*.08;c.lineCap='round';c.beginPath();c.arc(0,fr*.5,fr*.34,Math.PI*1.15,Math.PI*1.85);c.stroke();
+  // tear
+  const tp=((t*0.7)%1),ty=-fr*.05+tp*fr*.8;c.globalAlpha=fa*(1-tp);c.fillStyle='#7cc4ff';c.beginPath();c.moveTo(fr*.35,ty-fr*.12);c.quadraticCurveTo(fr*.47,ty+fr*.05,fr*.35,ty+fr*.08);c.quadraticCurveTo(fr*.23,ty+fr*.05,fr*.35,ty-fr*.12);c.fill();
+  c.restore();
+  // little rain cloud
+  if(t>2.4){const ca=Math.min(1,(t-2.4)*1.5);c.save();c.globalAlpha=ca*.85;c.font='42px -apple-system,Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,Arial';c.textAlign='center';c.fillText('🌧️',fx+fr*1.15,fy-fr*1.05);c.restore();}
+}
+
+/* ---------- boot ---------- */
+window.addEventListener('scroll',()=>$('#top').classList.toggle('scrolled',window.scrollY>4),{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&FX.running)closeFx();});
+window.__crib={get S(){return S;},stats:()=>stats(finals()),opponents,celebrate,closeFx,go,validate};
+render();
+if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
