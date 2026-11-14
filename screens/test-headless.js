@@ -51,7 +51,46 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await p.click('#view .m');await sleep(400);await p.screenshot({path:OUT+'6-match-sheet.png'});await p.click('#del');await sleep(400);
  console.log('delete',n0,'->',await p.evaluate(()=>__crib.S.matches.length));
  await p.click('[data-tab=rivals]');await sleep(200);await p.screenshot({path:OUT+'7-rivals.png'});await full(p,OUT+'7-rivals-full.png');
- await p.click('[data-tab=settings]');await sleep(200);await p.screenshot({path:OUT+'8-settings.png'});await full(p,OUT+'8-settings-full.png');
+ await p.click('[data-tab=home]');await sleep(200);await p.click('#gear');await sleep(200);await p.screenshot({path:OUT+'8-settings.png'});await full(p,OUT+'8-settings-full.png');
+
+ // ---------- stage 2: guide ----------
+ console.log('settings via gear:',await p.$eval('#top h1',e=>e.textContent));
+ await p.click('#back');await sleep(150);console.log('back ->',await p.$eval('#top h1',e=>e.textContent));
+ await p.click('[data-tab=guide]');await sleep(250);
+ console.log('guide title',await p.$eval('#top h1',e=>e.textContent),'sections',await p.$$eval('#gsec button',b=>b.map(x=>x.textContent)));
+ await p.screenshot({path:OUT+'9-guide.png'});await full(p,OUT+'9-guide-full.png');
+ await p.click('#gsec [data-g=count]');await sleep(200);await p.screenshot({path:OUT+'10-counting.png'});await full(p,OUT+'10-counting-full.png');
+ await p.click('#gsec [data-g=ex]');await sleep(200);
+ console.log('examples',await p.$$eval('[data-ex]',e=>e.length));
+ await p.click('[data-show="1"]');await sleep(200);await p.click('[data-show="0"]');await sleep(200);
+ await p.$eval('[data-ex="0"]',e=>e.scrollIntoView({block:'start'}));await p.evaluate(()=>window.scrollBy(0,-90));await sleep(150);
+ await p.screenshot({path:OUT+'11-example.png'});
+ console.log('example1 answer:',await p.$eval('[data-ex="0"] .ans',e=>e.innerText.replace(/\s+/g,' ').slice(0,140)),'tossed cards:',await p.$$eval('[data-ex="0"] .pc.toss',e=>e.length));
+ await full(p,OUT+'11-examples-full.png');
+ // trainer: fixed hand so the screenshot is reproducible
+ await p.click('#gsec [data-g=train]');await sleep(200);
+ await p.screenshot({path:OUT+'12-trainer.png'});
+ const t0=Date.now();
+ await p.evaluate(()=>{const T=__crib.TR;T.six='3h 4s 5d 5c Jh Ks'.split(' ').map(CribEngine.parse);T.dealer=false;T.sel=[];T.res=null;});
+ await p.click('#gsec [data-g=train]');await sleep(200);
+ await p.click('#trh [data-i="4"]');await p.click('#trh [data-i="5"]');await sleep(100);
+ await p.screenshot({path:OUT+'12b-trainer-picked.png'});
+ const tc=Date.now();await p.click('#trgo');await sleep(150);
+ console.log('trainer verdict:',await p.$eval('.verdict',e=>e.textContent),'ms',Date.now()-tc);
+ await p.screenshot({path:OUT+'13-trainer-result.png'});await full(p,OUT+'13-trainer-result-full.png');
+ await p.click('#trnew');await sleep(100);await p.click('#trh [data-i="0"]');await p.click('#trh [data-i="1"]');await p.click('#trgo');await sleep(100);
+ console.log('random hand verdict:',await p.$eval('.verdict',e=>e.textContent),'record',await p.evaluate(()=>localStorage.getItem('crib.trainer.v1')));
+ // speed: 200 random analyses in page
+ console.log('200 analyses ms',await p.evaluate(()=>{const t=performance.now();for(let i=0;i<200;i++)CribEngine.analyze(CribEngine.deal(6),i%2===0);return Math.round(performance.now()-t);}));
+ // guide numbers checked in-page too
+ console.log('in-page example check',await p.evaluate(()=>__crib.EXAMPLES.every(e=>{const a=CribEngine.analyze(e.h.split(' ').map(CribEngine.parse),!!e.d)[0];const tz=e.toss.split(' ').map(CribEngine.parse).map(CribEngine.id);return a.toss.every(c=>tz.includes(CribEngine.id(c)))&&a.now===e.now&&Math.round(a.net*10)/10===e.net;})));
+ // log nit: many opponents, scroll to bottom, Save must clear the tab bar
+ await p.evaluate(()=>{const s=JSON.parse(localStorage.getItem('crib.v1'));['Ann','Bob','Cal','Dee','Eli','Fay','Gus','Hal','Ivy','Jon'].forEach((o,i)=>s.matches.push({id:'x'+i,status:'final',opponent:o,firstDealer:null,myScore:121,oppScore:100,date:'2026-10-0'+(i%9+1),createdAt:50+i,updatedAt:50+i,scheduled:null,invite:null,notes:''}));localStorage.setItem('crib.v1',JSON.stringify(s));});
+ await p.reload({waitUntil:'networkidle0'});await p.click('[data-tab=log]');await sleep(200);
+ await p.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));await sleep(200);
+ const gapPx=await p.evaluate(()=>{const s=document.querySelector('#clear').getBoundingClientRect(),n=document.querySelector('#tabs').getBoundingClientRect();return Math.round(n.top-s.bottom);});
+ console.log('log: px between Clear button and tab bar at bottom of scroll',gapPx,gapPx>0?'OK':'FAIL');
+ await p.screenshot({path:OUT+'14-log-bottom.png'});
  console.log('errors',errs);
  await b.close();
 })();

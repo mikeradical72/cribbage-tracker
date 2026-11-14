@@ -178,6 +178,41 @@ dl.kv dt{color:var(--dim);font-weight:700} dl.kv dd{margin:0;text-align:right;fo
 @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 @keyframes fadeUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
 @keyframes blink{0%,100%{opacity:.35}50%{opacity:.85}}
+
+/* ---------- guide ---------- */
+main.tab-log{padding-bottom:calc(var(--sab) + 150px)}
+.gx h3{margin:0 0 8px;font-size:18px;font-weight:850;letter-spacing:-.01em}
+.gx p{margin:0 0 10px;color:var(--muted);font-size:15px}
+.gx p:last-child,.gx ul:last-child{margin-bottom:0}
+.gx ul{margin:0 0 10px;padding-left:20px;color:var(--muted);font-size:15px}
+.gx li{margin:5px 0} .gx b,.gx strong{color:var(--text)}
+.gx .tip{border-left:3px solid var(--gold);padding:8px 12px;background:rgba(242,193,78,.07);border-radius:0 12px 12px 0;color:var(--text);font-size:14.5px;margin:10px 0 0}
+.seat{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:99px}
+.seat.D{background:rgba(242,193,78,.16);color:var(--gold)} .seat.P{background:rgba(76,143,230,.18);color:#a9c9ff}
+.hand{display:flex;gap:6px;margin:12px 0 4px;flex-wrap:nowrap}
+.pc{position:relative;flex:1 1 0;max-width:58px;aspect-ratio:5/7;border-radius:9px;background:linear-gradient(180deg,#fffdf6,#f1e8d4);color:#1c1c1c;box-shadow:0 4px 10px -4px rgba(0,0,0,.6),inset 0 0 0 1px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1;transition:transform .15s,opacity .15s,box-shadow .15s;padding:0}
+.pc .r{font-size:clamp(17px,5.4vw,23px);letter-spacing:-.04em} .pc .s{font-size:clamp(16px,5vw,22px);margin-top:2px}
+.pc.red{color:#c8231b}
+.pc.toss{opacity:.42;transform:translateY(7px) scale(.95)}
+.pc.toss::after{content:"crib";position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:900}
+button.pc.sel{transform:translateY(-9px);box-shadow:0 0 0 3px var(--gold),0 10px 20px -6px rgba(0,0,0,.7)}
+.ans{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)}
+.kvs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.kvs span{font-size:12px;font-weight:800;padding:4px 9px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--muted)}
+.kvs span b{color:var(--text)}
+table.ct{width:100%;border-collapse:collapse;font-size:14.5px}
+table.ct td{padding:8px 4px;border-top:1px solid var(--line);vertical-align:top}
+table.ct td:last-child{text-align:right;font-weight:850;white-space:nowrap;color:var(--gold)}
+table.ct tr:first-child td{border-top:0}
+.opt{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 2px;border-top:1px solid var(--line);font-size:14px}
+.opt:first-child{border-top:0} .opt .k{font-weight:800} .opt .n{font-weight:900;text-align:right} .opt .d{grid-column:1/-1;font-size:12px;color:var(--dim);font-weight:650}
+.opt.best .k::before{content:"★ ";color:var(--gold)} .opt.mine{background:rgba(76,143,230,.1);border-radius:10px;padding-left:8px;padding-right:8px}
+.verdict{border-radius:16px;padding:14px;text-align:center;font-weight:850;font-size:17px;margin:12px 0}
+.verdict.W{color:var(--win);background:rgba(123,216,143,.08);border:1px solid rgba(123,216,143,.4)}
+.verdict.L{color:#ffd28a;background:rgba(242,193,78,.07);border:1px solid rgba(242,193,78,.35)}
+#gsec button{padding:0 4px;font-size:13.5px}
+.pc .s{font-variant-emoji:text}
 </style>
 </head>
 <body>
@@ -188,12 +223,14 @@ dl.kv dt{color:var(--dim);font-weight:700} dl.kv dd{margin:0;text-align:right;fo
   <button data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>History</button>
   <button data-tab="log" class="add" aria-label="Log a match"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Log</button>
   <button data-tab="rivals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.5 4.5 4.5"/></svg>Rivals</button>
-  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Setup</button>
+  <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>Guide</button>
 </nav>
 <div id="fx"><canvas id="fxc"></canvas><div class="msg" id="fxm"></div><div class="tap">Tap to continue</div></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="file" accept="application/json,.json" hidden>
 
+<script src="crib-table.js"></script>
+<script src="engine.js"></script>
 <script>
 'use strict';
 /* ---------- constants ---------- */
@@ -287,12 +324,13 @@ function matchSheet(id){
 /* ---------- render ---------- */
 function render(){
   $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ({home:renderHome,log:renderLog,history:renderHistory,rivals:renderRivals,settings:renderSettings})[tab]();
+  $('#view').className='tab-'+tab;
+  ({home:renderHome,log:renderLog,history:renderHistory,rivals:renderRivals,settings:renderSettings,guide:renderGuide})[tab]();
 }
 function holesHTML(list,n=30){const r=list.slice(0,n).reverse();return`<div class="holes">${r.map(m=>`<i class="${won(m)?'w':'l'}"></i>`).join('')}${'<i></i>'.repeat(Math.max(0,n-r.length))}</div>`;}
 function renderHome(){
   const v=$('#view'),F=finals(),st=stats(F),P=pendings();
-  setTop(`<div><div class="sub">Cribbage tracker</div><h1>Crib Log</h1></div>`);
+  setTop(`<div><div class="sub">Cribbage tracker</div><h1>Crib Log</h1></div><button class="btn sm" id="gear" aria-label="Setup" style="width:42px;padding:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg></button>`);$('#gear').onclick=()=>{vib();go('settings');};
   if(!F.length&&!P.length){
     v.innerHTML=`<div class="card empty"><div class="miniboard wood"><div class="holes">${'<i></i>'.repeat(12)}</div><div class="holes" style="padding-top:10px">${'<i></i>'.repeat(12)}</div></div>
       <h2>No games on the board yet</h2><p>Log your first match and your win rate, streak, and margins show up here.</p>
@@ -432,7 +470,7 @@ function renderRivals(){
 /* ---------- settings ---------- */
 function renderSettings(){
   const v=$('#view');
-  setTop(`<div><div class="sub">Name · sound · data</div><h1>Setup</h1></div>`);
+  setTop(`<div><button class="back" id="back">${I.back}Home</button><div class="sub">Name · sound · data</div><h1>Setup</h1></div>`);$('#back').onclick=()=>go('home');
   v.innerHTML=`<div class="card"><div class="field" style="margin-bottom:0"><div class="label">Your name on the board</div><input class="inp" id="me" value="${esc(S.me)}" maxlength="24" enterkeyhint="done"></div></div>
    <div class="card"><div class="row between"><div><div style="font-weight:800">Sound effects</div><div class="muted" style="font-size:13px">Fanfare on a win, sad trombone on a loss</div></div>
      <div class="seg" id="snd" style="width:140px;grid-template-columns:1fr 1fr"><button data-v="1" class="${S.sound?'on':''}" style="height:44px">On</button><button data-v="0" class="${S.sound?'':'on'}" style="height:44px">Off</button></div></div></div>
@@ -441,7 +479,7 @@ function renderSettings(){
     <div class="muted" style="font-size:13px;margin-top:10px">Data lives only on this device. Export a backup now and then.</div></div>
    <div class="card"><div class="label" style="margin-bottom:10px">Try the animations</div><div class="row"><button class="btn block" id="tw">Win</button><button class="btn block" id="tl">Loss</button></div></div>
    <div class="card"><button class="btn block danger" id="reset">Erase all data</button></div>
-   <div class="dim" style="text-align:center;font-size:12px;margin:8px 0 20px">Crib Log v1 · games to ${GAME_TO} · works offline</div>`;
+   <div class="dim" style="text-align:center;font-size:12px;margin:8px 0 20px">Crib Log v2 · games to ${GAME_TO} · works offline</div>`;
   $('#me').onchange=e=>{S.me=e.target.value.trim()||'Me';save();toast('Saved');};
   $('#snd').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.sound=b.dataset.v==='1';save();renderSettings();};
   $('#exjson').onclick=()=>download(`criblog-${today()}.json`,JSON.stringify(S,null,2),'application/json');
@@ -553,10 +591,154 @@ function drawLoss(c,W,H,t,dt){
   if(t>2.4){const ca=Math.min(1,(t-2.4)*1.5);c.save();c.globalAlpha=ca*.85;c.font='42px -apple-system,Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,Arial';c.textAlign='center';c.fillText('🌧️',fx+fr*1.15,fy-fr*1.05);c.restore();}
 }
 
+
+/* ---------- study guide (stage 2) ---------- */
+const CE=window.CribEngine;
+const GSECS=[['tips','Rules'],['count','Counting'],['ex','Examples'],['train','Trainer']];
+let gsec=(()=>{try{return localStorage.getItem('crib.guide.sec')||'tips';}catch(e){return'tips';}})();
+const cardHTML=(c,cls='',tag='div',attr='')=>`<${tag} class="pc${c.s===1||c.s===2?' red':''}${cls?' '+cls:''}" ${attr}><span class="r">${CE.RANKS[c.r-1]}</span><span class="s">${CE.SUITS[c.s]}</span></${tag}>`;
+const cardsTxt=cs=>cs.map(c=>CE.name(c)+'\uFE0E').join(' ');
+const seatHTML=d=>d?'<span class="seat D">Your crib · dealer</span>':'<span class="seat P">Their crib · pone</span>';
+const sgn=x=>(x>=0?'+':'−')+Math.abs(x).toFixed(1);
+/* Worked examples. Every number here is re-derived from engine.js in test-headless.js (tests fail if any is off).
+   now = points in the 4 kept cards before the cut; ev = average hand points over the 46 possible cuts;
+   crib = average value of the two thrown cards in a random crib; net = ev ± crib; gap = how much better than the 2nd-best throw. */
+const EXAMPLES=[
+ {h:'5h 5s Jd Qc 3h 9s',d:1,toss:'3h 9s',now:10,ev:12.7,crib:4.1,net:16.8,gap:3.3,
+  why:'Two 5s with two ten-cards is four 15s and a pair: <b>10 points before the cut</b>, and any ten-card cut adds at least 4 more. The 3-9 is a dull crib throw, but nothing else is close. (Same keep if you were pone.)'},
+ {h:'3h 4s 5d 5c Jh Ks',d:1,toss:'3h 4s',now:10,ev:12.4,crib:5.5,net:17.9,gap:1.1,
+  why:'Keeping 5-5-J-K (<b>10 now</b>) and keeping 3-4-5-5 (8 now) score about the same once the cut is in. The tiebreaker is the crib: touching 3-4 is a great gift to <i>your own</i> crib, while J-K is a poor one.'},
+ {h:'3h 4s 5d 5c Jh Ks',d:0,toss:'Jh Ks',now:8,ev:12.5,crib:4.3,net:8.2,gap:1.3,
+  why:'Same six cards, but now the crib is theirs. Don’t hand them touching 3-4. Keep the double run <b>3-4-5-5 (8 now)</b>, which catches a lot of cuts, and toss J-K.'},
+ {h:'7h 8s 8d 9c Kh 2s',d:1,toss:'Kh 2s',now:12,ev:14.2,crib:3.9,net:18.1,gap:6.1,
+  why:'7-8-8-9 is a double run (8) plus two 7-8 fifteens (4): <b>12 now</b>. Never break a double run to feed the crib. K-2 goes in.'},
+ {h:'4h 4s 5d 6c Jh Qs',d:1,toss:'Jh Qs',now:12,ev:15.6,crib:5.0,net:20.6,gap:6.6,
+  why:'4-4-5-6 is a double run plus two 4-5-6 fifteens: <b>12 now</b>, averaging about 15.6 after the cut because 4s, 5s and 6s all pile on. J-Q are touching, so they are a nice bonus in your own crib.'},
+ {h:'6h 6s 9d 9c Ah Qs',d:1,toss:'Ah Qs',now:12,ev:12.9,crib:3.9,net:16.7,gap:5.6,
+  why:'Two pairs where every 6-9 makes 15 (four 15s): <b>12 now</b>. A-Q is a weak crib throw, but the hand is worth too much to break.'},
+ {h:'2h 4h 6h 8h Kc 9s',d:1,toss:'Kc 9s',now:4,ev:7.2,crib:3.5,net:10.7,gap:0.9,
+  why:'A four-card flush counts <b>4 in your hand</b>, or 5 if a heart is cut. In the crib a flush needs all five cards, so keep the flush in your hand. 9-K is a poor crib throw, but the flush is worth more.'},
+ {h:'4h 5s 6d Kc Qh 2s',d:0,toss:'Kc 2s',now:7,ev:9.8,crib:3.9,net:5.9,gap:0.1,
+  why:'Keep 4-5-6 (a run and a 15) plus a ten-card for 5+10: <b>7 now</b>. Keeping the Q or the K is basically a coin flip, but a King is the safest card to give: it only fits one run (J-Q-K). Pair it with the 2, which is far away.'},
+ {h:'2h 3s 4d 9c Th Ks',d:0,toss:'Th Ks',now:5,ev:8.1,crib:3.4,net:4.7,gap:0.2,
+  why:'10-K is the stingiest throw in cribbage: about 3.4 points in an average crib, the lowest of any two cards. Keep 2-3-4-9, a run plus 2+4+9: <b>5 now</b>.'},
+ {h:'Ah 2s 7d 8c Kh Js',d:0,toss:'Ah Kh',now:2,ev:4.2,crib:3.8,net:0.5,gap:0.1,
+  why:'Don’t give them 7-8. It is already a 15 and half a run, and averages about 6.8 in a crib. Keep it yourself (<b>2 now</b>) and throw the A-K, which are as far apart as two cards get.'},
+ {h:'Th Js Qd Kc 5h 5s',d:0,toss:'Th Kc',now:10,ev:12.4,crib:3.4,net:9.0,gap:0.5,
+  why:'Keep the 5s with two ten-cards: <b>10 now</b>. Which two ten-cards do you give away? 10-K is the worst crib combo there is because it can’t make a run without J-Q, so keep the J-Q. The J can also score nobs.'},
+ {h:'5h Js Kd 4c 9h 2s',d:0,toss:'9h 2s',now:4,ev:6.9,crib:4.1,net:2.8,gap:0.6,
+  why:'Never give a 5 to the other player’s crib: any 5 averages about 6.5 there. Keep 5-J-K-4 (5+J and 5+K, <b>4 now</b>). It needs a cut, but the 9-2 you throw doesn’t touch and doesn’t make 15.'},
+ {h:'3h 3s 4d 4c 9h Ks',d:0,toss:'9h Ks',now:4,ev:8.1,crib:3.5,net:4.6,gap:1.9,
+  why:'3-3-4-4 is only <b>4 now</b> (two pairs), but a 5 cut makes it 20 and a 2 cut makes it 16 (double-double runs), so it averages about 8. Throw 9-K, which are far apart.'},
+ {h:'Ah 3s 7d 9c Qh Ks',d:0,toss:'9c Ks',now:0,ev:2.1,crib:3.5,net:-1.4,gap:0.0,
+  why:'This hand is trash: <b>0 now</b>, and every option nets out negative. When nothing scores, the only goal is to make their crib as bad as possible, so throw the 9 and the K. Keep the low cards for pegging.'}
+];
+const exCards=e=>e.h.split(' ').map(CE.parse);
+let exOpen=new Set();
+const CHEAT=[['5-5',9.0],['5-J',7.3],['5-6',7.1],['5-10',7.0],['4-5',7.0],['2-3',6.8],['7-8',6.8],['6-9',5.6],['J-Q',5.0],['A-K',3.7],['9-K',3.5],['10-K',3.4]];
+function renderGuide(){
+  const v=$('#view');
+  setTop(`<div><div class="sub">Study guide · 2-player</div><h1>Crib Guide</h1></div>`);
+  const tabs=`<div class="filters" id="gsec" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${GSECS.map(([k,l])=>`<button data-g="${k}" class="${gsec===k?'on':''}">${l}</button>`).join('')}</div>`;
+  v.innerHTML=tabs+'<div id="gbody"></div>';
+  $('#gsec').onclick=e=>{const b=e.target.closest('button');if(!b)return;vib();gsec=b.dataset.g;try{localStorage.setItem('crib.guide.sec',gsec);}catch(_){}renderGuide();window.scrollTo(0,0);};
+  ({tips:gTips,count:gCount,ex:gExamples,train:gTrainer})[gsec]($('#gbody'));
+}
+function gTips(el){
+  el.innerHTML=`<div class="card gx"><h3>The one rule</h3>
+    <p>You're dealt 6 cards and throw 2 into the crib. Pick the throw that's worth the most on average, counting the crib too:</p>
+    <ul><li><b>Your crib (you dealt):</b> hand + crib. Both are yours.</li><li><b>Their crib (you're pone):</b> hand − crib. Every point you throw in is theirs.</li></ul>
+    <div class="tip">Your hand usually matters most. Pick the best 4 cards first, then let the crib break near-ties.</div></div>
+  <div class="card gx"><h3><span class="seat D">Dealer</span>&nbsp; Feeding your own crib</h3><ul>
+    <li><b>5s are gold.</b> 5-5 averages about <b>9.0</b> points in a crib. A 5 with a ten-card (5-J, 5-10, 5-Q, 5-K) averages 6.8–7.3.</li>
+    <li><b>Touching cards</b> (2-3, 4-5, 5-6, 7-8) and <b>15s</b> (7-8, 6-9, 5-10) are good throws. 7-8 averages about 6.8.</li>
+    <li><b>Pairs</b> are solid (5.0–6.3, and 5-5 is the best by far).</li>
+    <li>It's fine to keep a hand that's slightly worse if it lets you throw a much better pair into your own crib.</li>
+    <li>The hand still comes first. If the best keep leaves you with 10-K, throw 10-K even though it's the weakest crib throw.</li></ul></div>
+  <div class="card gx"><h3><span class="seat P">Pone</span>&nbsp; Starving their crib</h3><ul>
+    <li><b>Never give them a 5.</b> Any 5 averages about 6.5 in a crib, far more than any other card.</li>
+    <li>Don't throw <b>pairs</b>, <b>touching cards</b> (7-8, 6-7, 2-3…), or two cards that <b>add up to 15</b> (7-8, 6-9, 5-10).</li>
+    <li><b>Throw far-apart cards</b>: 10-K (about <b>3.4</b>, the lowest of all), 9-K, 9-Q, 8-K, A-K.</li>
+    <li><b>The King is the safest card to give</b> (about 4.0 on average). It can only fit one run (J-Q-K). The J is riskier because it can score nobs.</li>
+    <li>When your hand is trash anyway, it's all about the crib. Throw the most useless pair you have.</li></ul></div>
+  <div class="card gx"><h3>Hand vs crib tradeoffs</h3><ul>
+    <li>The hand usually decides it. Kept hands range from 0 to 29, while a crib throw only runs from about 3.4 to 9.</li>
+    <li>When two keeps are within about 1 point, let the crib decide. Feed your own crib, starve theirs.</li>
+    <li>Keep cards that <b>catch cuts</b>. Double runs (3-4-5-5, 7-8-8-9) and 5s with ten-cards gain the most from the starter.</li>
+    <li>Low cards (A–4) are handy for pegging. These numbers ignore pegging, so late in a game, when pegging can decide it, factor that in.</li></ul>
+    <div class="tip">Crib averages above are exact: every possible pair of other cards and every cut, <b>random</b> opponent cards. Real opponents throw on purpose, so your actual crib numbers will vary a bit, but the order holds.</div></div>
+  <div class="card gx"><h3>Cheat sheet</h3><table class="ct">
+    ${CHEAT.map(([a,b])=>`<tr><td>${a}</td><td>${b.toFixed(1)}</td></tr>`).join('')}
+    </table><div class="dim" style="font-size:12px;margin-top:8px;font-weight:650">Average crib points for a 2-card throw (off-suit). Computed exactly by Crib Log.</div></div>`;
+}
+function gCount(el){
+  const rows=[['Fifteen: any combo adding to 15 (face cards = 10, A = 1)','2 each'],['Pair','2'],['Three of a kind (3 pairs)','6'],['Four of a kind (6 pairs)','12'],
+    ['Run of 3+ in a row, any suits','1 per card'],['Double run of 3 (3-3-4-5): two runs + a pair','8'],['Double run of 4 (3-3-4-5-6)','10'],['Triple run (3-3-3-4-5): three runs + three pairs','15'],['Double-double run (3-3-4-4-5): four runs + two pairs','16'],
+    ['Flush in <b>hand</b>: all 4 hand cards one suit','4 (5 with cut)'],['Flush in <b>crib</b>: needs all 5 incl. cut','5 or 0'],['Nobs: Jack in hand/crib matching the cut suit','1'],['His heels: cut card is a Jack (dealer)','2']];
+  el.innerHTML=`<div class="card gx"><h3>Counting the show</h3><p>Count in this order: <b>15s, pairs, runs, flush, nobs.</b> The cut card counts with every hand and with the crib. Pone counts first, then dealer, then the crib.</p>
+    <table class="ct">${rows.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
+    <div class="dim" style="font-size:12px;margin-top:8px;font-weight:650">Run and pair points are shown without 15s. Example: 3-3-4-5 is 8 for the double run, plus 3+3+4+5 = 15 for 2, so 10 total.</div></div>
+  <div class="card gx"><h3>Famous hands</h3><ul>
+    <li><b>29</b>, the max: 5-5-5-J with the 5 of the Jack's suit cut. Sixteen for 15s, 12 for pairs, 1 for nobs.</li>
+    <li><b>28</b>: 5-5-5-5 with any ten-card.</li>
+    <li><b>24</b>: 7-7-8-8-9, 4-4-5-5-6, or 3-3-3-3-9.</li>
+    <li><b>19</b>: can't be scored, so "nineteen" is the joke for a zero hand. 25, 26 and 27 are impossible too.</li></ul>
+    <div class="tip">Out of all 12,994,800 four-card hands with a cut, the average is <b>4.77</b> points and 7.8% score zero. Crib Log's scorer reproduces these exact counts.</div></div>
+  <div class="card gx"><h3>Pegging refresher</h3><ul>
+    <li>Bring the count to 15 or exactly 31: <b>2</b>. Go (or last card under 31): <b>1</b>.</li>
+    <li>Pairs: 2, 6, 12 as cards stack. Runs: 1 per card, in any order, if they're played back to back.</li>
+    <li>Leading a 4 or lower is safe (no 15 off it). Don't lead a 5. Holding a pair lets you answer a pair with three of a kind.</li></ul></div>`;
+}
+function gExamples(el){
+  el.innerHTML=`<div class="muted" style="font-size:13.5px;margin:0 4px 12px;font-weight:600">Decide your 2 throws, then tap <b>Show answer</b>. "Now" = points in the 4 cards you keep, "avg" = average after all 46 possible cuts, "crib" = average crib value of the throw.</div>`+
+  EXAMPLES.map((e,i)=>{const cs=exCards(e),tz=e.toss.split(' ').map(CE.parse).map(CE.id),open=exOpen.has(i);
+    const keep=cs.filter(c=>!tz.includes(CE.id(c)));
+    return`<div class="card" data-ex="${i}"><div class="row between"><div class="label">Hand ${i+1}</div>${seatHTML(e.d)}</div>
+      <div class="hand">${cs.map(c=>cardHTML(c,open&&tz.includes(CE.id(c))?'toss':'')).join('')}</div>
+      ${open?`<div class="ans gx" style="margin-top:20px"><div style="font-weight:850;font-size:16px">Keep ${cardsTxt(keep)} · throw ${cardsTxt(e.toss.split(' ').map(CE.parse))}</div>
+        <div class="kvs"><span>now <b>${e.now}</b></span><span>avg <b>${e.ev.toFixed(1)}</b></span><span>crib <b>${e.d?'+':'−'}${e.crib.toFixed(1)}</b></span><span>net <b>${e.net.toFixed(1)}</b></span><span>beats next by <b>${e.gap<0.1?'&lt;0.1':e.gap.toFixed(1)}</b></span></div>
+        <p style="margin:0">${e.why}</p></div>`:`<button class="btn sm block" data-show="${i}" style="margin-top:12px">Show answer</button>`}</div>`;}).join('');
+  $$('[data-show]',el).forEach(b=>b.onclick=()=>{vib();exOpen.add(+b.dataset.show);const y=window.scrollY;gExamples(el);window.scrollTo(0,y);});
+}
+/* trainer */
+const TK='crib.trainer.v1';
+let TR=null;
+const trStats=()=>{try{return{n:0,best:0,lost:0,...JSON.parse(localStorage.getItem(TK)||'{}')};}catch(e){return{n:0,best:0,lost:0};}};
+function trDeal(){const six=CE.deal(6).sort((a,b)=>a.r-b.r||a.s-b.s);TR={six,dealer:Math.random()<.5,sel:[],res:null};}
+function gTrainer(el){
+  if(!TR)trDeal();
+  const st=trStats(),T=TR;
+  el.innerHTML=`<div class="card"><div class="row between"><div class="label">Discard trainer</div>${seatHTML(T.dealer)}</div>
+    <div class="hand" id="trh" style="margin-top:18px">${T.six.map((c,i)=>cardHTML(c,(T.sel.includes(i)?'sel':'')+(T.res&&T.sel.includes(i)?' toss':''),'button',`data-i="${i}" aria-label="${CE.name(c)}"`)).join('')}</div>
+    ${T.res?trResult(T):`<div class="muted" style="text-align:center;font-size:14px;font-weight:700;margin:14px 0 12px">${T.sel.length<2?`Tap ${2-T.sel.length} card${T.sel.length===1?'':'s'} to throw into ${T.dealer?'your':'their'} crib`:'Ready'}</div>
+      <button class="btn pri block" id="trgo" ${T.sel.length===2?'':'disabled'}>Check my throw</button>`}
+    <div class="row" style="margin-top:10px"><button class="btn block" id="trnew">${T.res?'Next hand':'New hand'}</button><button class="btn block" id="trseat">Switch seat</button></div></div>
+  <div class="card"><div class="row between"><div class="label">Your record</div><button class="btn sm" id="trreset" style="height:30px;font-size:12px">Reset</button></div>
+    <div class="grid2" style="margin:10px 0 0"><div class="stat"><div class="label">Best throw</div><b class="num">${st.n?Math.round(st.best/st.n*100)+'%':'—'}</b><small>${st.best} of ${st.n} hands</small></div>
+    <div class="stat"><div class="label">Avg pts lost</div><b class="num">${st.n?(st.lost/st.n).toFixed(2):'—'}</b><small>vs best throw, per hand</small></div></div></div>
+  <div class="dim gx" style="font-size:12.5px;margin:0 4px 10px"><p style="font-size:12.5px;color:var(--dim)">How it's scored: for each of the 15 possible throws, Crib Log averages your hand over all 46 unseen cuts (exact), then adds (dealer) or subtracts (pone) the average value of the two thrown cards in a crib. That crib value is precomputed exactly, assuming the other player's two cards are random. Pegging isn't counted.</p></div>`;
+  $('#trh').onclick=e=>{const b=e.target.closest('[data-i]');if(!b||T.res)return;vib(8);const i=+b.dataset.i;
+    T.sel=T.sel.includes(i)?T.sel.filter(x=>x!==i):T.sel.length<2?[...T.sel,i]:[T.sel[1],i];gTrainer(el);};
+  const g=$('#trgo');if(g)g.onclick=()=>{const all=CE.analyze(T.six,T.dealer),ids=T.sel.map(i=>CE.id(T.six[i]));
+    const mine=all.find(o=>o.toss.every(c=>ids.includes(CE.id(c))));const rank=all.indexOf(mine)+1,lost=all[0].net-mine.net,isBest=lost<1e-9;
+    T.res={all,mine,rank,lost,isBest};const s=trStats();s.n++;if(isBest)s.best++;s.lost=Math.round((s.lost+lost)*1000)/1000;try{localStorage.setItem(TK,JSON.stringify(s));}catch(e){}
+    vib(isBest?[10,40,10]:20);gTrainer(el);};
+  $('#trnew').onclick=()=>{vib();trDeal();gTrainer(el);};
+  $('#trseat').onclick=()=>{vib();T.dealer=!T.dealer;T.sel=T.res?[]:T.sel;T.res=null;gTrainer(el);};
+  $('#trreset').onclick=()=>{if(confirm('Reset trainer record?')){try{localStorage.removeItem(TK);}catch(e){}gTrainer(el);}};
+}
+function trResult(T){
+  const {all,mine,rank,lost,isBest}=T.res,top=all.slice(0,5);if(!top.includes(mine))top.push(mine);
+  return`<div class="verdict ${isBest?'W':'L'}" style="margin-top:22px">${isBest?'Best throw! ★':`#${rank} of 15 · ${lost.toFixed(2)} pts behind the best`}</div>
+   <div class="label" style="margin-bottom:4px">Top throws · net = avg hand ${T.dealer?'+':'−'} crib</div>
+   ${top.map(o=>`<div class="opt${o===all[0]?' best':''}${o===mine?' mine':''}"><div class="k">Throw ${cardsTxt(o.toss)}${o===mine?' <span class="chip" style="margin-left:4px">you</span>':''}</div><div class="n num">${o.net.toFixed(2)}</div>
+     <div class="d">keep ${cardsTxt(o.keep)} · now ${o.now} · avg ${o.handEV.toFixed(2)} (${o.min}–${o.max}) · crib ${T.dealer?'+':'−'}${o.crib.toFixed(2)}</div></div>`).join('')}`;
+}
+
 /* ---------- boot ---------- */
 window.addEventListener('scroll',()=>$('#top').classList.toggle('scrolled',window.scrollY>4),{passive:true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&FX.running)closeFx();});
-window.__crib={get S(){return S;},stats:()=>stats(finals()),opponents,celebrate,closeFx,go,validate};
+window.__crib={get S(){return S;},EXAMPLES,CHEAT,get TR(){return TR;},stats:()=>stats(finals()),opponents,celebrate,closeFx,go,validate};
 render();
 if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
